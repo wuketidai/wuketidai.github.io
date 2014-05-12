@@ -3,18 +3,15 @@
 <head>
   <meta charset="utf-8">
   
-  <title>笃行</title>
+  <title>Async Stop Preparing MediaPlayer | 笃行</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta content="article" property="og:type">
-<meta content="笃行" property="og:title">
+<meta content="Async Stop Preparing MediaPlayer" property="og:title">
 <meta content="http://blog.wuketidai.com/2014/05/12/async-stop-preparing-mediaplayer/" property="og:url">
 <meta property="og:image">
 <meta content="笃行" property="og:site_name">
-<meta content="title: ‘Async Stop Preparing MediaPlayer’date: 2014-05-12 20:59:29
-tags:Android
-Async Stop Preparing MediaPlayer
-问题描述
-在Android MediaPlayer的使用过程中，播放 stream media 需要prepareAsync，prepare完毕后onPrepared则会被回" property="og:description">
+<meta content="问题描述
+在Android MediaPlayer的使用过程中，播放 stream media 需要prepareAsync，prepare完毕后onPrepared则会被回调，而后就可以开始播放音频了。在这个过程中，发现如果在Preparing状态中调用stop 或者 release 方法试图改变mediaPlayer状态，那么stop或release方法都会等待prepare完成造成主线程被b" property="og:description">
 <meta content="summary" name="twitter:card">
   
     <link rel="alternative" href="/atom.xml" title="笃行" type="application/atom+xml">
@@ -64,19 +61,26 @@ Async Stop Preparing MediaPlayer
         <section id="main"><article id="post-async-stop-preparing-mediaplayer" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2014/05/12/async-stop-preparing-mediaplayer/" class="article-date">
-  <time datetime="2014-05-12T13:01:54.000Z" itemprop="datePublished">5月 12 2014</time>
+  <time datetime="2014-05-12T12:59:29.000Z" itemprop="datePublished">5月 12 2014</time>
 </a>
     
   </div>
   <div class="article-inner">
     
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Async Stop Preparing MediaPlayer
+    </h1>
+  
+
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
-        <p>title: ‘Async Stop Preparing MediaPlayer’<br>date: 2014-05-12 20:59:29</p>
-<h2 id="tags:Android">tags:Android</h2>
-<h1 id="Async_Stop_Preparing_MediaPlayer">Async Stop Preparing MediaPlayer</h1>
-<h2 id="问题描述">问题描述</h2>
+        <h2 id="问题描述">问题描述</h2>
 <p>在Android MediaPlayer的使用过程中，播放 stream media 需要prepareAsync，prepare完毕后onPrepared则会被回调，而后就可以开始播放音频了。在这个过程中，发现如果在Preparing状态中调用stop 或者 release 方法试图改变mediaPlayer状态，那么stop或release方法都会等待prepare完成造成主线程被block的状态。当然从设计上来说这是合理的，如若允许stop或者release一个未初始化完毕的对象，那么必将导致资源回收非常复杂。</p>
 <h2 id="解决思路">解决思路</h2>
 <pre><code><span class="keyword">enum</span> PlayStatus {
@@ -112,8 +116,11 @@ Async Stop Preparing MediaPlayer
  * 在preparing状态下调用能够异步停止播放，不至于block主线程
  */</span>
 <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stopAsync</span>() {
-    <span class="keyword">if</span> (mPlayStatus == PlayStatus.Preparing || mPlayStatus == PlayStatus.Stopping || mPlayStatus == PlayStatus.PlayAfterStop) {
-        <span class="comment">// 这三个状态对应mediaPlayer在preparing，所以要停止时异步置为stopping的状态，onPrepared后将其停止了。</span>
+    <span class="keyword">if</span> (mPlayStatus == PlayStatus.Preparing
+      || mPlayStatus == PlayStatus.Stopping
+      || mPlayStatus == PlayStatus.PlayAfterStop) {
+        <span class="comment">// 这三个状态对应mediaPlayer在preparing</span>
+        <span class="comment">// 所以要停止时异步置为stopping的状态，onPrepared后将其停止了。</span>
         setStatus(PlayStatus.Stopping);
     } <span class="keyword">else</span> {
         stop();
@@ -137,9 +144,11 @@ Async Stop Preparing MediaPlayer
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.wuketidai.com/2014/05/12/async-stop-preparing-mediaplayer/" data-id="qmflu8wnzgvpm9of" class="article-share-link">Share</a>
+      <a data-url="http://blog.wuketidai.com/2014/05/12/async-stop-preparing-mediaplayer/" data-id="pdum883onua9lx0e" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+
     </footer>
   </div>
   
@@ -167,7 +176,7 @@ Async Stop Preparing MediaPlayer
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android/">Android</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android/">Android</a><span class="tag-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -197,7 +206,7 @@ Async Stop Preparing MediaPlayer
       <ul>
         
           <li>
-            <a href="/2014/05/12/async-stop-preparing-mediaplayer/">(no title)</a>
+            <a href="/2014/05/12/async-stop-preparing-mediaplayer/">Async Stop Preparing MediaPlayer</a>
           </li>
         
           <li>
