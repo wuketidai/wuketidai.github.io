@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta content="website" property="og:type">
 <meta content="笃行" property="og:title">
-<meta content="http://yoursite.com/archives/" property="og:url">
+<meta content="http://blog.wuketidai.com/archives/" property="og:url">
 <meta property="og:image">
 <meta content="笃行" property="og:site_name">
 <meta property="og:description">
@@ -51,13 +51,99 @@
         <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><input type="submit" value="&#xF002;" class="search-form-submit"><input type="hidden" name="q" value="site:http://yoursite.com"></form>
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><input type="submit" value="&#xF002;" class="search-form-submit"><input type="hidden" name="q" value="site:http://blog.wuketidai.com"></form>
       </div>
     </div>
   </div>
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="post-async-stop-preparing-mediaplayer" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/12/async-stop-preparing-mediaplayer/" class="article-date">
+  <time datetime="2014-05-12T13:01:54.000Z" itemprop="datePublished">5月 12 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>title: ‘Async Stop Preparing MediaPlayer’<br>date: 2014-05-12 20:59:29</p>
+<h2 id="tags:Android">tags:Android</h2>
+<h1 id="Async_Stop_Preparing_MediaPlayer">Async Stop Preparing MediaPlayer</h1>
+<h2 id="问题描述">问题描述</h2>
+<p>在Android MediaPlayer的使用过程中，播放 stream media 需要prepareAsync，prepare完毕后onPrepared则会被回调，而后就可以开始播放音频了。在这个过程中，发现如果在Preparing状态中调用stop 或者 release 方法试图改变mediaPlayer状态，那么stop或release方法都会等待prepare完成造成主线程被block的状态。当然从设计上来说这是合理的，如若允许stop或者release一个未初始化完毕的对象，那么必将导致资源回收非常复杂。</p>
+<h2 id="解决思路">解决思路</h2>
+<pre><code><span class="keyword">enum</span> PlayStatus {
+    Playing,       <span class="comment">// 正在播放</span>
+    Stopped,       <span class="comment">// 已停止</span>
+    Preparing,     <span class="comment">// 正在准备中</span>
+    Stopping,      <span class="comment">// 正在停止中</span>
+    PlayAfterStop  <span class="comment">// 正在准备播放下一段</span>
+}
+
+<span class="keyword">public</span> <span class="keyword">void</span> <span class="title">play</span>() {
+    <span class="keyword">if</span> (mPlayStatus == PlayStatus.Stopping) {
+        setStatus(PlayStatus.PlayAfterStop);
+    } <span class="keyword">else</span> {
+        <span class="keyword">if</span> (!TextUtils.isEmpty(mUrl)) {
+            <span class="keyword">try</span> {
+                mPlayer = createMediaPlayer();
+                mPlayer.setDataSource(mUrl);
+                mPlayer.prepareAsync();
+                setStatus(PlayStatus.Preparing);
+            } <span class="keyword">catch</span> (IOException e) {
+                e.printStackTrace();
+                setStatus(PlayStatus.Stopped);
+            }
+        } <span class="keyword">else</span> {
+            setStatus(PlayStatus.Stopped);
+        }
+    }
+}
+
+<span class="javadoc">/**
+ * 异步停止音频播放
+ * 在preparing状态下调用能够异步停止播放，不至于block主线程
+ */</span>
+<span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stopAsync</span>() {
+    <span class="keyword">if</span> (mPlayStatus == PlayStatus.Preparing || mPlayStatus == PlayStatus.Stopping || mPlayStatus == PlayStatus.PlayAfterStop) {
+        <span class="comment">// 这三个状态对应mediaPlayer在preparing，所以要停止时异步置为stopping的状态，onPrepared后将其停止了。</span>
+        setStatus(PlayStatus.Stopping);
+    } <span class="keyword">else</span> {
+        stop();
+    }
+}
+
+<span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPrepared</span>(MediaPlayer mp) {
+    <span class="keyword">if</span> (mPlayStatus == PlayStatus.Stopping) {
+        <span class="comment">// Stopping 对应 prepared 后停止播放</span>
+        stop();
+    } <span class="keyword">else</span> <span class="keyword">if</span> (mPlayStatus == PlayStatus.PlayAfterStop) {
+        <span class="comment">// PlayAfterStop 对应 prepared 后 停止播放的同时再启动播放</span>
+        stop();
+        play();
+    } <span class="keyword">else</span> <span class="keyword">if</span> (mPlayStatus == PlayStatus.Preparing) {
+        setStatus(PlayStatus.Playing);
+        mPlayer.start();
+    }
+}
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.wuketidai.com/2014/05/12/async-stop-preparing-mediaplayer/" data-id="qmflu8wnzgvpm9of" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-use-jackson" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -116,7 +202,7 @@ System.out.println(test.isSuccess);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2014/04/30/use-jackson/" data-id="6inc3suudvpjd7mz" class="article-share-link">Share</a>
+      <a data-url="http://blog.wuketidai.com/2014/04/30/use-jackson/" data-id="id1li4l4cpex23fn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
@@ -157,7 +243,7 @@ System.out.println(test.isSuccess);
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04">四月 2014</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05">五月 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04">四月 2014</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -167,6 +253,10 @@ System.out.println(test.isSuccess);
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2014/05/12/async-stop-preparing-mediaplayer/">(no title)</a>
+          </li>
         
           <li>
             <a href="/2014/04/30/use-jackson/">Use JackSon</a>

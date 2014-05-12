@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2014 | 笃行</title>
+  <title>Archives: 2014/5 | 笃行</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta content="website" property="og:type">
 <meta content="笃行" property="og:title">
-<meta content="http://blog.wuketidai.com/archives/2014/" property="og:url">
+<meta content="http://blog.wuketidai.com/archives/2014/05/" property="og:url">
 <meta property="og:image">
 <meta content="笃行" property="og:site_name">
 <meta property="og:description">
@@ -138,75 +138,6 @@
       <a data-url="http://blog.wuketidai.com/2014/05/12/async-stop-preparing-mediaplayer/" data-id="qmflu8wnzgvpm9of" class="article-share-link">Share</a>
       
       
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-use-jackson" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/04/30/use-jackson/" class="article-date">
-  <time datetime="2014-04-30T08:24:43.000Z" itemprop="datePublished">4月 30 2014</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/04/30/use-jackson/">Use JackSon</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Why_Use_JackSon">Why Use JackSon</h1>
-<ul>
-<li>提供Tree Binding 与 DataBinding两种模式</li>
-<li>高效率，效率比Android SDK 自带的 Json-lib快好几倍</li>
-</ul>
-<h1 id="JackSon_Resource">JackSon Resource</h1>
-<p>这里默认讨论的是JackSon的2.X版本,以下是相关资源。其中值得注意的是Jar 2.x版本需要把多个模块全都添加进来。</p>
-<ul>
-<li><a href="http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/index.html" target="_blank">JavaDoc</a></li>
-<li><a href="http://wiki.fasterxml.com/JacksonDownload" target="_blank">Jar</a></li>
-</ul>
-<h1 id="JackSon_example">JackSon example</h1>
-<pre><code>ObjectMapper mapper = <span class="keyword">new</span> ObjectMapper();
-
-<span class="comment">// Tree binding 模式 类似于生成dom，然后可以指定获取某个字段</span>
-JsonNode testNode = mapper.readTree(<span class="string">"{'isSuccess':true}"</span>);
-testNode.<span class="keyword">get</span>(<span class="string">'isSuccess'</span>).asBoolean();
-
-<span class="comment">// Data binding 模式</span>
-<span class="class"><span class="keyword">class</span> <span class="title">Test</span> {</span>
-    boolean isSuccess = <span class="literal">false</span>;
-}
-
-Test test = mapper.readValue(<span class="string">"{'isSuccess':true}"</span>, Test.<span class="keyword">class</span>);
-System.out.println(test.isSuccess);
-
-<span class="comment">// 两个模式可以混合起来用,非常灵活</span>
-JsonNode rootNode = mapper.readTree(<span class="string">"{'id':123456, 'test':{'isSuccess':true}}"</span>);
-JsonNode testNode = rootNode.<span class="keyword">get</span>(<span class="string">'test'</span>);
-Test test = mapper.treeToValue(testNode, Test.<span class="keyword">class</span>);
-System.out.println(test.isSuccess);
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://blog.wuketidai.com/2014/04/30/use-jackson/" data-id="id1li4l4cpex23fn" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-
     </footer>
   </div>
   
