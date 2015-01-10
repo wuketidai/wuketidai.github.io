@@ -4,12 +4,12 @@
 <head>
   <meta charset="utf-8">
   
-  <title>笃行</title>
+  <title>Archives: 2015 | 笃行</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description">
 <meta property="og:type" content="website">
 <meta property="og:title" content="笃行">
-<meta property="og:url" content="http://blog.wuketidai.com/">
+<meta property="og:url" content="http://blog.wuketidai.com/archives/2015/">
 <meta property="og:site_name" content="笃行">
 <meta property="og:description">
 <meta name="twitter:card" content="summary">
@@ -132,181 +132,6 @@
     <footer class="article-footer">
       
         <a data-url="http://blog.wuketidai.com/2015/01/11/检测当前录音权限/" data-id="dapmqby24qtyyqyr" class="article-share-link" data-share="baidu">Share</a>
-      
-
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-async-stop-preparing-mediaplayer" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/05/12/async-stop-preparing-mediaplayer/" class="article-date">
-  <time datetime="2014-05-12T12:59:29.000Z" itemprop="datePublished">5月 12 2014</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/05/12/async-stop-preparing-mediaplayer/">Async Stop Preparing MediaPlayer</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="问题描述">问题描述</h2>
-<p>在Android MediaPlayer的使用过程中，播放 stream media 需要prepareAsync，prepare完毕后onPrepared则会被回调，而后就可以开始播放音频了。在这个过程中，发现如果在Preparing状态中调用stop 或者 release 方法试图改变mediaPlayer状态，那么stop或release方法都会等待prepare完成造成主线程被block的状态。当然从设计上来说这是合理的，如若允许stop或者release一个未初始化完毕的对象，那么必将导致资源回收非常复杂。</p>
-<h2 id="解决思路">解决思路</h2>
-<pre><code><span class="keyword">enum</span> PlayStatus {
-    Playing,       <span class="comment">// 正在播放</span>
-    Stopped,       <span class="comment">// 已停止</span>
-    Preparing,     <span class="comment">// 正在准备中</span>
-    Stopping,      <span class="comment">// 正在停止中</span>
-    PlayAfterStop  <span class="comment">// 正在准备播放下一段</span>
-}
-
-<span class="keyword">public</span> <span class="keyword">void</span> <span class="title">play</span>() {
-    <span class="keyword">if</span> (mPlayStatus == PlayStatus.Stopping) {
-        setStatus(PlayStatus.PlayAfterStop);
-    } <span class="keyword">else</span> {
-        <span class="keyword">if</span> (!TextUtils.isEmpty(mUrl)) {
-            <span class="keyword">try</span> {
-                mPlayer = createMediaPlayer();
-                mPlayer.setDataSource(mUrl);
-                mPlayer.prepareAsync();
-                setStatus(PlayStatus.Preparing);
-            } <span class="keyword">catch</span> (IOException e) {
-                e.printStackTrace();
-                setStatus(PlayStatus.Stopped);
-            }
-        } <span class="keyword">else</span> {
-            setStatus(PlayStatus.Stopped);
-        }
-    }
-}
-
-<span class="javadoc">/**
- * 异步停止音频播放
- * 在preparing状态下调用能够异步停止播放，不至于block主线程
- */</span>
-<span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stopAsync</span>() {
-    <span class="keyword">if</span> (mPlayStatus == PlayStatus.Preparing
-      || mPlayStatus == PlayStatus.Stopping
-      || mPlayStatus == PlayStatus.PlayAfterStop) {
-        <span class="comment">// 这三个状态对应mediaPlayer在preparing</span>
-        <span class="comment">// 所以要停止时异步置为stopping的状态，onPrepared后将其停止了。</span>
-        setStatus(PlayStatus.Stopping);
-    } <span class="keyword">else</span> {
-        stop();
-    }
-}
-
-<span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPrepared</span>(MediaPlayer mp) {
-    <span class="keyword">if</span> (mPlayStatus == PlayStatus.Stopping) {
-        <span class="comment">// Stopping 对应 prepared 后停止播放</span>
-        stop();
-    } <span class="keyword">else</span> <span class="keyword">if</span> (mPlayStatus == PlayStatus.PlayAfterStop) {
-        <span class="comment">// PlayAfterStop 对应 prepared 后 停止播放的同时再启动播放</span>
-        stop();
-        play();
-    } <span class="keyword">else</span> <span class="keyword">if</span> (mPlayStatus == PlayStatus.Preparing) {
-        setStatus(PlayStatus.Playing);
-        mPlayer.start();
-    }
-}
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.wuketidai.com/2014/05/12/async-stop-preparing-mediaplayer/" data-id="8hhuvnbhvpqhhi55" class="article-share-link" data-share="baidu">Share</a>
-      
-
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-use-jackson" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/04/30/use-jackson/" class="article-date">
-  <time datetime="2014-04-30T08:24:43.000Z" itemprop="datePublished">4月 30 2014</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/04/30/use-jackson/">Use JackSon</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Why_Use_JackSon">Why Use JackSon</h1>
-<ul>
-<li>提供Tree Binding 与 DataBinding两种模式</li>
-<li>高效率，效率比Android SDK 自带的 Json-lib快好几倍</li>
-</ul>
-<h1 id="JackSon_Resource">JackSon Resource</h1>
-<p>这里默认讨论的是JackSon的2.X版本,以下是相关资源。其中值得注意的是Jar 2.x版本需要把多个模块全都添加进来。</p>
-<ul>
-<li><a href="http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/index.html" target="_blank" rel="external">JavaDoc</a></li>
-<li><a href="http://wiki.fasterxml.com/JacksonDownload" target="_blank" rel="external">Jar</a></li>
-</ul>
-<h1 id="JackSon_example">JackSon example</h1>
-<pre><code>ObjectMapper mapper = <span class="keyword">new</span> ObjectMapper();
-
-<span class="comment">// Tree binding 模式 类似于生成dom，然后可以指定获取某个字段</span>
-JsonNode testNode = mapper.readTree(<span class="string">"{'isSuccess':true}"</span>);
-testNode.<span class="keyword">get</span>(<span class="string">'isSuccess'</span>).asBoolean();
-
-<span class="comment">// Data binding 模式</span>
-<span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>{
-    boolean isSuccess = <span class="literal">false</span>;
-}
-
-Test test = mapper.readValue(<span class="string">"{'isSuccess':true}"</span>, Test.<span class="keyword">class</span>);
-System.out.println(test.isSuccess);
-
-<span class="comment">// 两个模式可以混合起来用,非常灵活</span>
-JsonNode rootNode = mapper.readTree(<span class="string">"{'id':123456, 'test':{'isSuccess':true}}"</span>);
-JsonNode testNode = rootNode.<span class="keyword">get</span>(<span class="string">'test'</span>);
-Test test = mapper.treeToValue(testNode, Test.<span class="keyword">class</span>);
-System.out.println(test.isSuccess);
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://blog.wuketidai.com/2014/04/30/use-jackson/" data-id="th4j3s7ouhbu7w8v" class="article-share-link" data-share="baidu">Share</a>
       
 
       
